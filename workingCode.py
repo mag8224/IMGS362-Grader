@@ -4,15 +4,18 @@ import numpy as np
 import argparse
 import imutils
 import cv2
+import otherInfo
+
 
 # Read in filename from command line
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True)
 args = vars(ap.parse_args())
-
 # Read in sheet to be graded
 original = cv2.imread(args["image"])
 image = cv2.imread(args["image"])
+
+
 
 # Read in reference template of scan sheet
 template = cv2.imread("original_scan_sheet.png")
@@ -95,7 +98,19 @@ cv2.waitKey(0)
 # print(aligned.shape)
 # Crop the answer section out of registered image
 image = aligned[800:1450, 100:1100]
-cv2.imshow("aligned", aligned)
+firstname = aligned[105:750, 150:430]
+fname = otherInfo.get_first_name(firstname)
+lastname = aligned[100:750, 450:750]
+lname = otherInfo.get_last_name(lastname)
+uid = aligned[100:400, 750:1100]
+UID = otherInfo.get_UID(uid)
+additionalInfo = aligned[450:700, 750:1100]
+other = otherInfo.get_additional_info(additionalInfo)
+
+cv2.imshow("first name", firstname)
+cv2.imshow("last name", lastname)
+cv2.imshow("uid", uid)
+cv2.imshow("additional", additionalInfo)
 cv2.imshow("cropped", image)
 cv2.waitKey(0)
 
@@ -172,24 +187,23 @@ for c in cnts:
 	if w >= 10 and h >= 10 and ar >= 0.85 and ar <= 1.15:
 		questionCnts.append(c)
 
-print(len(questionCnts))
-
-# cv2.drawContours(image, questionCnts, -1, (0, 0, 255), 3)
-# cv2.imshow('Bubbles', image)
-# cv2.waitKey(0)
-
 questionCntsMod = []
-for x in range(0, len(questionCnts), 30):
+for x in range(0, len(questionCnts), 30): #30 comes from 5 bubbles per row of a question, with 6 columns across
 	questionCntsSortedLR = questionCnts[x:x+30]
 	questionCntsSortedLR = contours.sort_contours(questionCntsSortedLR, method="left-to-right")[0]
 	questionCntsMod += questionCntsSortedLR
 
 questionCnts1 = []
 questionCnts2 = []
+answers = np.zeros(150*5).reshape(150, 5)
+
+
 
 for x in range(0, len(questionCnts), 30):
+
 	questionCnts1 += questionCntsMod[x:x + 5]
 	questionCnts2 += questionCntsMod[x+5:x+10]
+
 
 # cv2.drawContours(image, questionCnts2, -1, (0, 0, 255), 3)
 # cv2.imshow('Bubbles', image)
@@ -206,6 +220,8 @@ correct = 0
 
 cnts1 = []
 for (q, i) in enumerate(np.arange(0, len(questionCnts1), 5)):
+	#q is the question number
+
 	# sort the contours for the current question from
 	# left to right, then initialize the index of the
 	# bubbled answer
@@ -218,10 +234,12 @@ for (q, i) in enumerate(np.arange(0, len(questionCnts1), 5)):
 		# "bubble" for the question
 		mask = np.zeros(thresh.shape, dtype="uint8")
 		cv2.drawContours(mask, [c], -1, 255, -1)
+		cv2.imshow('mask', mask)
+
 		# apply the mask to the thresholded image, then
 		# count the number of non-zero pixels in the
 		# bubble area
-		mask = cv2.bitwise_and(thresh, thresh, mask=mask)
+		mask = cv2.bitwise_and(thresh, thresh, mask=mask) #idk why this is thresh twice
 		total = cv2.countNonZero(mask)
 		# if the current total has a larger number of total
 		# non-zero pixels, then we are examining the currently
