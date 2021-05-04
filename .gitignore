@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+*.xml
+*.iml
+.DS_Store
+.idea/IMGS362-Grader.iml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/other.xml
+.idea/vcs.xml
