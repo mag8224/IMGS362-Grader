@@ -198,8 +198,12 @@ def readAnswers(image, template):
 	answers = {}
 	ANSWER_KEY_COL1 = {}
 	import output
+	import os.path
 	file = "answerKey.csv"
-	output.create_output("answerKey.csv")
+	if (os.path.exists("answerKey.csv")):
+		output.clearFile(file)
+	else:
+		output.create_output("answerKey.csv")
 	output.append_score("Answer Key", file)
 	output.newLine(file)
 
@@ -251,7 +255,7 @@ def readAnswers(image, template):
 			# "bubble" for the question
 			mask = np.zeros(thresh.shape, dtype="uint8")
 			cv2.drawContours(mask, [c], -1, 255, -1)
-			cv2.imshow('mask', mask)
+			#cv2.imshow('mask', mask)
 
 			# apply the mask to the thresholded image, then
 			# count the number of non-zero pixels in the
