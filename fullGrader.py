@@ -176,7 +176,9 @@ def gradeQuestions(roi, answers):
     if(len(answers)> 125):
         scoreCol6 = score(questionCnts6, roi, thresh, answers, 126)
         correct += scoreCol6
-    return correct / len(answers) * 100
+    cv2.imshow('ROI Graded', roi)
+    cv2.waitKey(0)
+    return correct / len(answers) * 100, roi
 
 
 def readLetter(roi, thresh, cnts):
@@ -481,7 +483,12 @@ def read_scan_sheet(template, image, answers):
     additionalInfoROI = aligned_color[300:500, 500:700]
 
     # begin actually reading the bubbles
-    score = gradeQuestions(questionsROI, answers)
+    score, graded_roi = gradeQuestions(questionsROI, answers)
+    aligned_color[540:1000, 95:750] = graded_roi
+    cv2.putText(aligned_color, "{:.2f}%".format(score), (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+    cv2.imshow('Graded Sheet', aligned_color)
+    cv2.waitKey()
     print(score)
     lastName = findLastName(lastNameROI)
     print(lastName)
@@ -496,7 +503,6 @@ def read_scan_sheet(template, image, answers):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    #ap.add_argument("-k", "--key", required=True, help="Test Answer Key")
     ap.add_argument("-i", "--image", required=True, help="Image of Student Test")
     ap.add_argument("-k", "--key", required=True, help="image of test key")
     args = vars(ap.parse_args())
