@@ -61,6 +61,8 @@ def scale(template, image):
     return aligned_show
 
 def gradeQuestions(roi, answers):
+    return 0
+
 
 def read_scan_sheet(template, image, answers):
     template_color = template
